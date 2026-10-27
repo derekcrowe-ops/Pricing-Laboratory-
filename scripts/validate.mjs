@@ -8,6 +8,9 @@ const variablePer= sum('cogs-manufacture')+sum('cogs-inbound')+sum('cogs-packagi
 const fixed=E.filter(e=>e.classification==='fixed').reduce((a,e)=>a+e.amount/(e.frequency==='annual'?12:1),0);
 const units=10, price=129, revenue=units*price, variable=units*variablePer, contribution=revenue-variable, profit=contribution-fixed, be=Math.ceil(fixed/(price-variablePer));
 assert(Math.abs(variablePer-82.701)<1e-8);assert(Math.abs(fixed-337.9166666667)<1e-6);assert.equal(be,8);assert(Math.abs(profit-125.0733333333)<1e-6);
+const breakEvenRevenue=be*price,safetyUnits=units-be,safetyPercent=safetyUnits/units,totalCosts=variable+fixed;
+assert.equal(breakEvenRevenue,1032);assert.equal(safetyUnits,2);assert.equal(safetyPercent,.2);assert(Math.abs(totalCosts-1164.9266666667)<1e-6);
+for(const testPrice of [70,variablePer]){const contributionPerUnit=testPrice-variablePer;const breakEvenUnits=contributionPerUnit>0?Math.ceil(fixed/contributionPerUnit):Infinity;assert.equal(breakEvenUnits,Infinity)}
 const inv=25*(sum('cogs-manufacture')+sum('cogs-inbound')+sum('cogs-packaging'));const startup=E.filter(e=>e.classification==='startup').reduce((a,e)=>a+e.amount,0);assert.equal(inv,1452);assert.equal(startup,1020);
-console.log(JSON.stringify({status:'PASS',expenseCount:model.suggestedExpenses.length,competitorCount:market.pricing_offers.length,variablePerUnit:variablePer,fixedMonthly:fixed,breakEvenUnits:be,monthlyProfit:profit,inventoryCash:inv,startupCosts:startup},null,2));
+console.log(JSON.stringify({status:'PASS',expenseCount:model.suggestedExpenses.length,competitorCount:market.pricing_offers.length,variablePerUnit:variablePer,fixedMonthly:fixed,breakEvenUnits:be,breakEvenRevenue,marginOfSafety:{units:safetyUnits,percent:safetyPercent},expectedTotalCosts:totalCosts,monthlyProfit:profit,zeroAndNegativeContribution:'no finite break-even displayed',inventoryCash:inv,startupCosts:startup},null,2));
 
